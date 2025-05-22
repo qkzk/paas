@@ -1,0 +1,4 @@
+2025-05-22T20:36:34.251563Z  INFO paas::route: Input file abc def
+2025-05-22T20:36:34.251698Z  INFO paas::route: Command pandoc - args ["input.md", "-o", "output.pdf"]
+2025-05-22T20:41:25.969263Z  INFO paas::route: Input file abc def
+2025-05-22T20:41:25.969294Z  INFO paas::route: Command pandoc - args ["input.md", "-o", "output.pdf"]

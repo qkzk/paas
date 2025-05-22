@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Pandoc As A Service</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <h1>Pandoc As A Service</h1>
+  <form id="documentForm">
+    <label for="content">Contenu du document:</label><br>
+    <textarea id="content" name="content" rows="10" cols="50"></textarea><br>
+    <label for="parameters">Paramètres:</label><br>
+    <input type="text" id="parameters" name="parameters"><br>
+    <label for="output_filename">Nom du fichier de sortie:</label><br>
+    <input type="text" id="output_filename" name="output_filename" value="output.pdf"><br>
+    <button type="button" onclick="submitForm()">OK</button>
+  </form>
+  <script>
+    function submitForm() {
+      const content = document.getElementById('content').value;
+      const parameters = document.getElementById('parameters').value;
+      const output_filename = document.getElementById('output_filename').value;
+
+      fetch('/document', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({content, parameters, output_filename}),
+      })
+        .then(response => {
+          if (response.ok) {
+            return response.blob();
+          } else {
+            return response.text().then(text => {throw new Error(text);});
+          }
+        })
+        .then(blob => {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = output_filename;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+        })
+        .catch(error => {
+          alert('Erreur: ' + error.message);
+        });
+    }
+  </script>
+</body>
+
+</html>
