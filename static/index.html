@@ -9,11 +9,11 @@
 <body>
   <h1>Pandoc As A Service</h1>
   <form id="documentForm">
-    <label for="content">Contenu du document:</label><br>
+    <label for="content">Markdown content:</label><br>
     <textarea id="content" name="content" rows="10" cols="50"></textarea><br>
-    <label for="parameters">Paramètres:</label><br>
+    <label for="parameters">pandoc parameters:</label><br>
     <input type="text" id="parameters" name="parameters"><br>
-    <label for="output_filename">Nom du fichier de sortie:</label><br>
+    <label for="output_filename">Output filename:</label><br>
     <input type="text" id="output_filename" name="output_filename" value="output.pdf"><br>
     <button type="button" onclick="submitForm()">OK</button>
   </form>
@@ -48,7 +48,7 @@
           window.URL.revokeObjectURL(url);
         })
         .catch(error => {
-          alert('Erreur: ' + error.message);
+          alert('Error: ' + error.message);
         });
     }
   </script>
