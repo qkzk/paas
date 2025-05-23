@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Login</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <h1>Login</h1>
+  <form id="loginForm">
+    <label for="password">Password:</label><br>
+    <input type="password" id="password" name="password" value="your_password"><br>
+    <button type="button" onclick="login()">Login</button>
+  </form>
+  <script>
+    function login() {
+      const password = document.getElementById('password').value;
+      if (password === 'your_password') { // Remplacez 'your_password' par le mot de passe réel
+        <!-- localStorage.setItem('authToken', 'valid_token'); -->
+        document.cookie = "authToken=valid_token; path=/"
+        console.log('cookie sent:', document.cookie); // Vérifier le stockage du jeton
+        window.location.href = '/';
+      } else {
+        alert('Invalid password');
+      }
+    }
+  </script>
+</body>
+
+</html>

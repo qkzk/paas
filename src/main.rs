@@ -1,3 +1,7 @@
+use std::sync::Arc;
+
+use axum::Extension;
+use rand::{distr::Alphanumeric, rng, Rng};
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize)]
@@ -5,6 +9,27 @@ pub struct DocumentRequest {
     content: String,
     parameters: String,
     output_filename: String,
+}
+
+/// Application state.
+/// It holds the authentifaction token provided to login.
+pub struct State {
+    pub token: String,
+}
+
+impl Default for State {
+    fn default() -> Self {
+        let token = Self::generate_random_token();
+        println!("State generated token {token}");
+        Self { token }
+    }
+}
+
+impl State {
+    fn generate_random_token() -> String {
+        let mut rng = rng();
+        (0..32).map(|_| rng.sample(Alphanumeric) as char).collect()
+    }
 }
 
 pub mod route {
@@ -22,6 +47,22 @@ pub mod route {
     use tracing::info;
 
     const INPUT_FILE: &str = "input.md";
+
+    pub async fn login<B>(state: Extension<Arc<State>>) -> Response<Full<B>>
+    where
+        B: Send + 'static + std::convert::From<&'static str> + bytes::Buf,
+    {
+        Response::builder()
+            .header(
+                "Set-Cookie",
+                format!(
+                    "authToken={}; Path=/; HttpOnly; Secure; SameSite=Strict",
+                    state.token
+                ),
+            )
+            .body(Full::from(include_str!("../static/login.html")))
+            .expect("Couldn't serve login")
+    }
 
     pub async fn index() -> Html<&'static str> {
         Html(include_str!("../static/index.html"))
@@ -69,7 +110,7 @@ pub mod route {
             .spawn()
             .expect("Failed to spawn pandoc process")
             .wait_with_output()
-            .expect("Pandoc failed")
+            .expect("Pandoc command failed")
     }
 
     /// Clean up the temporary input file
@@ -116,24 +157,44 @@ pub mod route {
 }
 
 pub mod logger {
-    use std::fs::OpenOptions;
+    use std::fs::{File, OpenOptions};
 
-    use tracing::Level;
-    use tracing_subscriber::FmtSubscriber;
+    use tracing::{level_filters::LevelFilter, Level};
+    use tracing_subscriber::{
+        fmt::format::{DefaultFields, Format},
+        FmtSubscriber,
+    };
 
     const LOG_FILE: &str = "src/paas.log";
-    /// Initialize logging
-    pub fn setup_logger() {
-        let file = OpenOptions::new()
+
+    fn erase_big_log() {
+        let log_file_path = std::path::Path::new(LOG_FILE);
+        if log_file_path.exists() && log_file_path.metadata().expect("").len() > 1024 * 1024 {
+            std::fs::remove_file(log_file_path).expect("Couldn't delete log file");
+            println!("Deleted logfile which was too big");
+        }
+    }
+
+    fn open_log() -> File {
+        OpenOptions::new()
             .append(true)
             .open(LOG_FILE)
-            .expect("Couldn't create log file");
-        let subscriber = FmtSubscriber::builder()
+            .unwrap_or_else(|_| File::create(LOG_FILE).expect("Couldn't open nor create log file"))
+    }
+
+    fn setup_subscriber(file: File) -> FmtSubscriber<DefaultFields, Format, LevelFilter, File> {
+        FmtSubscriber::builder()
             .with_max_level(Level::INFO)
             .with_ansi(false)
             .with_writer(file)
-            // .with_target(false)
-            .finish();
+            .finish()
+    }
+
+    /// Initialize logging
+    pub fn setup_logger() {
+        erase_big_log();
+        let file = open_log();
+        let subscriber = setup_subscriber(file);
         tracing::subscriber::set_global_default(subscriber)
             .expect("setting default subscriber failed");
     }
@@ -144,15 +205,54 @@ pub mod server {
     use std::env;
 
     use axum::{
+        http::{Request, StatusCode},
+        middleware::{self, Next},
+        response::Response,
         routing::{get, post},
         Router,
     };
 
-    fn build_app() -> Router {
-        Router::new()
+    async fn check_auth<B>(
+        state: Extension<Arc<State>>,
+        request: Request<B>,
+        next: Next<B>,
+    ) -> Result<Response, StatusCode>
+    where
+        B: Send + 'static,
+    {
+        let cookies = request
+            .headers()
+            .get("Cookie")
+            .and_then(|header| header.to_str().ok())
+            .unwrap_or("");
+
+        let auth_token = cookies
+            .split(';')
+            .find(|cookie| cookie.trim().starts_with("authToken="))
+            .and_then(|cookie| cookie.split('=').nth(1));
+
+        println!(
+            "auth_token {auth_token:?} - state.token {st:?}",
+            st = Some(&state.token)
+        );
+        if auth_token == Some(&state.token) {
+            Ok(next.run(request).await)
+        } else {
+            Err(StatusCode::UNAUTHORIZED)
+        }
+    }
+
+    fn build_app(state: Arc<State>) -> Router {
+        let protected_routes = Router::new()
             .route("/", get(route::index))
             .route("/style.css", get(route::style_css))
             .route("/document", post(route::handle_document))
+            .route_layer(middleware::from_fn(check_auth));
+
+        Router::new()
+            .route("/login", get(route::login))
+            .merge(protected_routes)
+            .layer(Extension(state))
     }
 
     fn format_addr() -> String {
@@ -168,8 +268,8 @@ pub mod server {
             .expect("Couldn't build server");
     }
 
-    pub async fn serve() {
-        let app = build_app();
+    pub async fn serve(state: Arc<State>) {
+        let app = build_app(state);
         let addr = format_addr();
         build_server(app, addr).await
     }
@@ -178,5 +278,6 @@ pub mod server {
 #[tokio::main]
 async fn main() {
     logger::setup_logger();
-    server::serve().await;
+    let state = Arc::new(State::default());
+    server::serve(state).await;
 }
