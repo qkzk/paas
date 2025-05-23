@@ -1,4 +1,15 @@
+## ALPHA VERSION 
+
+This is an alpha version which is still in development. Currently, the certificates paths are hardcoded and can't be changed. It will change soonly.
+
 # PaaS - Pandoc As A Service
+
+Have you ever wished to creates a pdf from some markdown ? There's not a lot of solutions online and your data may be used by the provider...
+
+PAAS is a self hosting solution allowing you to execute pandoc from your server with all the filters you may have installed. 
+Log in on your server, paste some markdow and your pdf is created and downloaded immediatly.
+
+---
 
 This is a minimal web server written in Rust using [Axum](https://docs.rs/axum/latest/axum/), designed for simple login-protected pandoc conversion.
 
@@ -8,9 +19,8 @@ It provides:
 - A basic HTML login page
 - Password-based authentication
 - Secure cookie-based session management
-- Redirect after login
 
-## Usage
+## Server usage 
 
 You can run the development version with debug symbols:
 
@@ -31,19 +41,13 @@ Replace `super` with your desired password.
 
 **Note:** `sudo` is required because the server uses HTTPS on port 3000.
 
+## Client Usage 
+
+1. Join your server at `your.domain:3000/login`,
+2. Input the password provided when launching the server,
+3. Type some markdown (only), pass some arguments to pandoc and a desired filename
+4. Voilà ! Pandoc does the conversion like if you were at home.
+
 ## License
 
 This project is licensed under the **Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)** license.
-
-You are free to:
-
-* Share — copy and redistribute the material in any medium or format
-* Adapt — remix, transform, and build upon the material
-
-**Under the following terms:**
-
-* **Attribution** — You must give appropriate credit.
-* **NonCommercial** — You may not use the material for commercial purposes.
-
-For the full license text, see: [https://creativecommons.org/licenses/by-nc/4.0/](https://creativecommons.org/licenses/by-nc/4.0/)
-
