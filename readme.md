@@ -38,15 +38,25 @@ To run the release version (optimized):
 
 ```bash
 cargo build --release
+sudo PAAS_PASSWORD=super 
 FULLCHAIN=/path/to/fullchain.pem 
 PRIVATEKEY=/path/to/privkey.pem
 PORT=3000
-sudo PAAS_PASSWORD=super ./target/release/paas
+./target/release/paas
 ```
 
 Replace `super` with your desired password.
 
 **Note:** `sudo` is required because the server uses HTTPS on port 3000.
+
+### Configuration 
+
+All configuration is made through environement variables :
+
+- port 
+- password 
+- cert fullchain path 
+- cert private key path 
 
 ## Client Usage 
 
