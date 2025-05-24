@@ -30,6 +30,7 @@ cargo build
 sudo PAAS_PASSWORD=super 
 FULLCHAIN=/path/to/fullchain.pem 
 PRIVATEKEY=/path/to/privkey.pem
+PORT=3000
 ./target/debug/paas
 ````
 
@@ -39,6 +40,7 @@ To run the release version (optimized):
 cargo build --release
 FULLCHAIN=/path/to/fullchain.pem 
 PRIVATEKEY=/path/to/privkey.pem
+PORT=3000
 sudo PAAS_PASSWORD=super ./target/release/paas
 ```
 
