@@ -1,6 +1,6 @@
 ## ALPHA VERSION 
 
-This is an alpha version which is still in development. Currently, the certificates paths are hardcoded and can't be changed. It will change soonly.
+This is an alpha version which is still in development.
 
 # PaaS - Pandoc As A Service
 
@@ -27,13 +27,18 @@ You can run the development version with debug symbols:
 ```bash
 export RUST_BACKTRACE=1
 cargo build
-sudo PAAS_PASSWORD=super ./target/debug/paas
+sudo PAAS_PASSWORD=super 
+FULLCHAIN=/path/to/fullchain.pem 
+PRIVATEKEY=/path/to/privkey.pem
+./target/debug/paas
 ````
 
 To run the release version (optimized):
 
 ```bash
 cargo build --release
+FULLCHAIN=/path/to/fullchain.pem 
+PRIVATEKEY=/path/to/privkey.pem
 sudo PAAS_PASSWORD=super ./target/release/paas
 ```
 

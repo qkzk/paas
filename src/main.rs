@@ -286,9 +286,17 @@ pub mod server {
         format!("0.0.0.0:{}", port)
     }
 
+    fn read_fullchain() -> PathBuf {
+        PathBuf::from(env::var("FULLCHAIN").unwrap_or_else(|_| FULLCHAIN_PEM.to_owned()))
+    }
+
+    fn read_privatekey() -> PathBuf {
+        PathBuf::from(env::var("PRIVATEKEY").unwrap_or_else(|_| PRIVATEKEY_PEM.to_owned()))
+    }
+
     async fn build_server(app: Router, addr: String) {
-        let cert_path = PathBuf::from(FULLCHAIN_PEM);
-        let key_path = PathBuf::from(PRIVATEKEY_PEM);
+        let cert_path = read_fullchain();
+        let key_path = read_privatekey();
 
         let config = RustlsConfig::from_pem_file(cert_path, key_path)
             .await
