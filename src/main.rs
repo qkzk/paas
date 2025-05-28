@@ -42,10 +42,10 @@ pub mod route {
     use std::fs::write;
     use std::process::{Command, Output, Stdio};
 
-    use axum::extract::{Extension, Form};
     use axum::{
         body::{Bytes, Full},
         extract::Json,
+        extract::{Extension, Form},
         http::{Response, StatusCode},
         response::{Html, IntoResponse, Redirect},
     };
@@ -225,9 +225,9 @@ pub mod server {
     use std::path::PathBuf;
 
     use axum::{
-        http::{Request, StatusCode},
+        http::Request,
         middleware::{self, Next},
-        response::Response,
+        response::{IntoResponse, Redirect, Response},
         routing::{get, post},
         Router,
     };
@@ -240,7 +240,7 @@ pub mod server {
         state: Extension<Arc<State>>,
         request: Request<B>,
         next: Next<B>,
-    ) -> Result<Response, StatusCode>
+    ) -> Response
     where
         B: Send + 'static,
     {
@@ -260,9 +260,9 @@ pub mod server {
         );
 
         if auth_token == Some(&state.token) {
-            Ok(next.run(request).await)
+            next.run(request).await
         } else {
-            Err(StatusCode::UNAUTHORIZED)
+            Redirect::to("/login").into_response()
         }
     }
 
