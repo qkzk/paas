@@ -40,16 +40,16 @@ pub mod route {
     use super::*;
     use std::collections::HashMap;
     use std::fs::write;
-    use std::path::Path;
     use std::process::{Command, Output, Stdio};
 
     use axum::{
         body::{Bytes, Full},
         extract::Json,
         extract::{Extension, Form},
-        http::{Response, StatusCode},
-        response::{Html, IntoResponse, Redirect, Response as ResponseResponse},
+        http::{header, Response, StatusCode},
+        response::{Html, IntoResponse, Redirect},
     };
+    use tokio::fs::read;
     use tracing::info;
 
     const INPUT_FILE: &str = "input.md";
@@ -88,12 +88,9 @@ pub mod route {
             .expect("Couldn't serve style.css")
     }
 
-    pub async fn favicon() -> ResponseResponse {
-        let path = Path::new("static/favicon.ico");
-        match tokio::fs::read(path).await {
-            Ok(bytes) => {
-                ([(axum::http::header::CONTENT_TYPE, "image/x-icon")], bytes).into_response()
-            }
+    pub async fn favicon() -> impl IntoResponse {
+        match read("static/favicon.ico").await {
+            Ok(bytes) => ([(header::CONTENT_TYPE, "image/x-icon")], bytes).into_response(),
             Err(_) => StatusCode::NOT_FOUND.into_response(),
         }
     }
