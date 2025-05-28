@@ -40,6 +40,7 @@ pub mod route {
     use super::*;
     use std::collections::HashMap;
     use std::fs::write;
+    use std::path::Path;
     use std::process::{Command, Output, Stdio};
 
     use axum::{
@@ -47,7 +48,7 @@ pub mod route {
         extract::Json,
         extract::{Extension, Form},
         http::{Response, StatusCode},
-        response::{Html, IntoResponse, Redirect},
+        response::{Html, IntoResponse, Redirect, Response as ResponseResponse},
     };
     use tracing::info;
 
@@ -85,6 +86,16 @@ pub mod route {
             .header("Content-Type", "text/css")
             .body(Full::from(include_str!("../static/style.css")))
             .expect("Couldn't serve style.css")
+    }
+
+    pub async fn favicon() -> ResponseResponse {
+        let path = Path::new("static/favicon.ico");
+        match tokio::fs::read(path).await {
+            Ok(bytes) => {
+                ([(axum::http::header::CONTENT_TYPE, "image/x-icon")], bytes).into_response()
+            }
+            Err(_) => StatusCode::NOT_FOUND.into_response(),
+        }
     }
 
     fn first_500_chars(s: &str) -> String {
@@ -274,6 +285,7 @@ pub mod server {
 
         Router::new()
             .route("/style.css", get(route::style_css))
+            .route("/favicon.ico", get(route::favicon))
             .route("/login", get(route::login_get))
             .route("/login", post(route::login_post))
             .merge(protected_routes)
