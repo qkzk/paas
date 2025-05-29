@@ -1,4 +1,5 @@
 body {
+  margin: 1em;
   background-color: #222;
   color: #fff;
   font-family: Arial, sans-serif;
@@ -8,8 +9,18 @@ h1 {
   color: #fff;
 }
 
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+
 textarea,
 input {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: monospace;
   background-color: #333;
   color: #fff;
   border: 1px solid #555;
@@ -19,7 +30,8 @@ button {
   background-color: #444;
   color: #fff;
   border: none;
-  padding: 10px 20px;
+  padding: 0.5em;
+  font-size: 1em;
   cursor: pointer;
 }
 

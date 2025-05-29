@@ -1,0 +1,17 @@
+[Unit]
+Description=Pandoc As a Service - paas server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/home/quentin/gclem/dev/rust/paas/target/release/paas
+WorkingDirectory=/home/quentin/gclem/dev/rust/paas
+Environment=PAAS_PASSWORD=super
+Restart=on-failure
+StandardOutput=append:/var/log/paas.log
+StandardError=append:/var/log/paas.err.log
+
+[Install]
+WantedBy=multi-user.target
+

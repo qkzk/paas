@@ -1,22 +1,28 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+  <meta charset="UTF-8">
   <title>Pandoc As A Service</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
   <h1>Pandoc As A Service</h1>
   <form id="documentForm">
-    <label for="content">Markdown content:</label><br>
-    <textarea id="content" name="content" rows="10" cols="50"></textarea><br>
-    <label for="parameters">pandoc parameters:</label><br>
-    <input type="text" id="parameters" name="parameters"><br>
-    <label for="output_filename">Output filename:</label><br>
-    <input type="text" id="output_filename" name="output_filename" value="output.pdf"><br>
+    <label for="content">Markdown content:</label>
+    <textarea id="content" name="content" rows="10"></textarea>
+
+    <label for="parameters">Pandoc parameters:</label>
+    <input type="text" id="parameters" name="parameters">
+
+    <label for="output_filename">Output filename:</label>
+    <input type="text" id="output_filename" name="output_filename" value="output.pdf">
+
     <button type="button" onclick="submitForm()">OK</button>
   </form>
+
   <script>
     function submitForm() {
       const content = document.getElementById('content').value;
