@@ -290,7 +290,7 @@ pub mod server {
     }
 
     fn format_addr() -> String {
-        let port = env::var("PORT").unwrap_or_else(|_| "3000".to_string());
+        let port = env::var("PORT").unwrap_or_else(|_| "3333".to_string());
         println!("Starting PAAS. Listening on port {port}");
         format!("0.0.0.0:{}", port)
     }
